@@ -194,7 +194,6 @@ class Maze:
                 t +=1;
         return path
 
-
     def show(self):
         print('The states are :')
         print(self.states)
@@ -204,6 +203,7 @@ class Maze:
         print(self.map)
         print('The rewards:')
         print(self.rewards)
+
 
 def dynamic_programming(env, horizon):
     """ Solves the shortest path problem using dynamic programming
@@ -251,6 +251,7 @@ def dynamic_programming(env, horizon):
         # The optimal action is the one that maximizes the Q function
         policy[:,t] = np.argmax(Q,1);
     return V, policy;
+
 
 def value_iteration(env, gamma, epsilon):
     """ Solves the shortest path problem using value iteration
@@ -308,6 +309,7 @@ def value_iteration(env, gamma, epsilon):
     # Return the obtained policy
     return V, policy;
 
+
 def draw_maze(maze):
 
     # Map a color to each cell in the maze
@@ -344,6 +346,7 @@ def draw_maze(maze):
     for cell in tc:
         cell.set_height(1.0/rows);
         cell.set_width(1.0/cols);
+
 
 def animate_solution(maze, path):
 
