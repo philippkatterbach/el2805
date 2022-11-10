@@ -66,10 +66,12 @@ class Maze:
         s = 0;
         for i in range(self.maze.shape[0]):
             for j in range(self.maze.shape[1]):
-                if self.maze[i,j] != 1:
-                    states[s] = (i,j);
-                    map[(i,j)] = s;
-                    s += 1;
+Ad                for k in range (self.maze.shape[0]):
+                    for l in range (self.maze.shape[1]):
+                        if self.maze[i,j] != 1:
+                            states[s] = (i,j,k,l);
+                            map[(i,j,k,l)] = s;
+                            s += 1;
         return states, map
 
     def __move(self, state, action):
