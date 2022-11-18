@@ -43,6 +43,7 @@ class Maze:
         """
         self.maze                     = maze;
         self.actions                  = self.__actions();
+        self.minotaur_actions         = self.__minotaur_actions()
         self.states, self.map         = self.__states();
         self.n_actions                = len(self.actions);
         self.n_states                 = len(self.states);
@@ -59,6 +60,14 @@ class Maze:
         actions[self.MOVE_DOWN]  = (1,0);
         return actions;
 
+    def __minotaur_actions(self):
+        actions = dict();
+        actions[self.MOVE_LEFT] = (0, -1);
+        actions[self.MOVE_RIGHT] = (0, 1);
+        actions[self.MOVE_UP] = (-1, 0);
+        actions[self.MOVE_DOWN] = (1, 0);
+        return actions;
+
     def __states(self):
         states = dict();
         map = dict();
@@ -66,7 +75,7 @@ class Maze:
         s = 0;
         for i in range(self.maze.shape[0]):
             for j in range(self.maze.shape[1]):
-Ad                for k in range (self.maze.shape[0]):
+                for k in range (self.maze.shape[0]):
                     for l in range (self.maze.shape[1]):
                         if self.maze[i,j] != 1:
                             states[s] = (i,j,k,l);
@@ -88,10 +97,13 @@ Ad                for k in range (self.maze.shape[0]):
                               (col == -1) or (col == self.maze.shape[1]) or \
                               (self.maze[row,col] == 1);
         # Based on the impossiblity check return the next state.
+
         if hitting_maze_walls:
             return state;
         else:
-            return self.map[(row, col)];
+            return self.map[(row, col, self.states[state][2], self.states[state][3])];
+
+
 
     def __transitions(self):
         """ Computes the transition probabilities for every state action pair.
@@ -102,13 +114,40 @@ Ad                for k in range (self.maze.shape[0]):
         dimensions = (self.n_states,self.n_states,self.n_actions);
         transition_probabilities = np.zeros(dimensions);
 
-        # Compute the transition probabilities. Note that the transitions
-        # are deterministic.
+        # Compute the transition probabilities.
         for s in range(self.n_states):
             for a in range(self.n_actions):
                 next_s = self.__move(s,a);
-                transition_probabilities[next_s, s, a] = 1;
+                minotaur_actions = self.__possible_minotaur_actions(next_s)
+                n_minotaur_actions = len(minotaur_actions)
+                for a_minotaur in range(n_minotaur_actions):
+                    next_s_min = self.__minotaur_move(next_s, a_minotaur)
+                    transition_probabilities[next_s_min, s, a] = 1/n_minotaur_actions
+
         return transition_probabilities;
+
+    def __possible_minotaur_actions(self, state):
+         actions = [];
+         for action in self.minotaur_actions:
+             row = self.states[state][2] + self.actions[action][0];
+             col = self.states[state][3] + self.actions[action][1];
+             # Is the future position an impossible one ?
+             hitting_maze_walls = (row == -1) or (row == self.maze.shape[0]) or \
+                                  (col == -1) or (col == self.maze.shape[1]) or \
+                                  (self.maze[row, col] == 1);
+             if not hitting_maze_walls:
+                 actions.append(action)
+         return actions
+
+    def __minotaur_move(self, state, action):
+        """ Makes a step of the minotaur in the maze, given a current position and an action.
+                    Stay is not possible.
+                    :return tuple next_cell: Position (x,y) on the maze that agent transitions to.
+                """
+        # Compute the future position given current (state, action)
+        row = self.states[state][2] + self.actions[action][0];
+        col = self.states[state][3] + self.actions[action][1];
+        return self.map[(self.states[state][0], self.states[state][1], row, col)];
 
     def __rewards(self, weights=None, random_rewards=None):
 
