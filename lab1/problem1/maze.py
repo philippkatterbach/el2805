@@ -138,10 +138,16 @@ class Maze:
                  actions.append(action)
          return actions
 
-    def __minotaur_move(self, state, state_new):
-        minotaur_actions = self.__possible_minotaur_actions(state)
+    def __minotaur_random_move(self, state, state_new, action):
+        action = int(action)
+        minotaur_actions = self.__possible_minotaur_actions(state_new)
+        rand = np.random.rand()
         for a_minotaur in minotaur_actions:
-            next_s_min = self.__minotaur_move(next_s, a_minotaur)
+            next_s_min = self.__minotaur_move(state_new, a_minotaur)
+            prob = self.transition_probabilities[next_s_min, state, action]
+            rand = rand - prob
+            if rand <= 0:
+                return next_s_min
 
     def __minotaur_move(self, state, action):
         """ Makes a step of the minotaur in the maze, given a current position and an action.
@@ -154,7 +160,6 @@ class Maze:
         return self.map[(self.states[state][0], self.states[state][1], row, col)];
 
     def __rewards(self, weights=None, random_rewards=None):
-
         rewards = np.zeros((self.n_states, self.n_actions));
 
         # If the rewards are not described by a weight matrix
@@ -218,13 +223,13 @@ class Maze:
             while t < horizon-1:
                 # Move to next state given the policy and the current state
                 next_s = self.__move(s,policy[s,t]);
-                next_s_min = self.__minotaur_move()
+                next_s_min = self.__minotaur_random_move(s, next_s, policy[s,t])
                 # Add the position in the maze corresponding to the next state
                 # to the path
-                path.append(self.states[next_s])
+                path.append(self.states[next_s_min])
                 # Update time and state for next iteration
                 t +=1;
-                s = next_s;
+                s = next_s_min;
         if method == 'ValIter':
             # Initialize current state, next state and time
             t = 1;
@@ -439,18 +444,28 @@ def animate_solution(maze, path):
         cell.set_height(1.0/rows);
         cell.set_width(1.0/cols);
 
+    #TODO update method to have moving minotaur
 
     # Update the color at each frame
     for i in range(len(path)):
-        grid.get_celld()[(path[i])].set_facecolor(LIGHT_ORANGE)
-        grid.get_celld()[(path[i])].get_text().set_text('Player')
+        pos_player = (path[i][0], path[i][1])
+        pos_min = (path[i][2], path[i][3])
+        grid.get_celld()[(pos_player)].set_facecolor(LIGHT_ORANGE)
+        grid.get_celld()[(pos_player)].get_text().set_text('Player')
+
+        grid.get_celld()[(pos_min)].set_facecolor(LIGHT_RED)
+        grid.get_celld()[(pos_min)].get_text().set_text('Minotaur')
         if i > 0:
-            if path[i] == path[i-1]:
+            pos_player_new = (path[i-1][0], path[i-1][1])
+            pos_min_new = (path[i-1][2], path[i-1][3])
+            if pos_player == pos_player_new:
                 grid.get_celld()[(path[i])].set_facecolor(LIGHT_GREEN)
                 grid.get_celld()[(path[i])].get_text().set_text('Player is out')
             else:
-                grid.get_celld()[(path[i-1])].set_facecolor(col_map[maze[path[i-1]]])
-                grid.get_celld()[(path[i-1])].get_text().set_text('')
+                grid.get_celld()[(pos_player_new)].set_facecolor(col_map[maze[pos_player_new]])
+                grid.get_celld()[(pos_player_new)].get_text().set_text('')
+                grid.get_celld()[(pos_min_new)].set_facecolor(col_map[maze[pos_min_new]])
+                grid.get_celld()[(pos_min_new)].get_text().set_text('')
         display.display(fig)
         display.clear_output(wait=True)
         time.sleep(1)
