@@ -223,10 +223,15 @@ class Maze:
             while t < horizon-1:
                 # Move to next state given the policy and the current state
                 next_s = self.__move(s,policy[s,t]);
-                next_s_min = self.__minotaur_random_move(s, next_s, policy[s,t])
                 # Add the position in the maze corresponding to the next state
                 # to the path
-                path.append(self.states[next_s_min])
+                if not self.__is_finished(next_s):
+                    next_s_min = self.__minotaur_random_move(s, next_s, policy[s,t])
+                    path.append(self.states[next_s_min])
+                else:
+                    path.append(self.states[next_s])
+
+
                 # Update time and state for next iteration
                 t +=1;
                 s = next_s_min;
@@ -459,8 +464,8 @@ def animate_solution(maze, path):
             pos_player_new = (path[i-1][0], path[i-1][1])
             pos_min_new = (path[i-1][2], path[i-1][3])
             if pos_player == pos_player_new:
-                grid.get_celld()[(path[i])].set_facecolor(LIGHT_GREEN)
-                grid.get_celld()[(path[i])].get_text().set_text('Player is out')
+                grid.get_celld()[(pos_player)].set_facecolor(LIGHT_GREEN)
+                grid.get_celld()[(pos_player)].get_text().set_text('Player is out')
             else:
                 grid.get_celld()[(pos_player_new)].set_facecolor(col_map[maze[pos_player_new]])
                 grid.get_celld()[(pos_player_new)].get_text().set_text('')
