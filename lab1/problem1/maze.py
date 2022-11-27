@@ -90,7 +90,7 @@ class Maze:
             :return tuple next_cell: Position (x,y) on the maze that agent transitions to.
         """
         # Compute the future position given current (state, action)
-        if self.__is_finished(state):
+        if self.__is_finished(state) or self.__player_caught(state):
             return state
         row = self.states[state][0] + self.actions[action][0];
         col = self.states[state][1] + self.actions[action][1];
@@ -199,7 +199,7 @@ class Maze:
         return (self.maze[self.states[state][0],self.states[state][1]] == 2) and \
                (self.states[state][0] != self.states[state][2]) and (self.states[state][1] != self.states[state][3])
 
-    def __player_eaten(self, state):
+    def __player_caught(self, state):
         return (self.states[state][0] == self.states[state][2]) and (self.states[state][1] == self.states[state][3])
 
 
@@ -457,20 +457,29 @@ def animate_solution(maze, path):
         pos_min = (path[i][2], path[i][3])
         grid.get_celld()[(pos_player)].set_facecolor(LIGHT_ORANGE)
         grid.get_celld()[(pos_player)].get_text().set_text('Player')
-
         grid.get_celld()[(pos_min)].set_facecolor(LIGHT_RED)
         grid.get_celld()[(pos_min)].get_text().set_text('Minotaur')
+
+
         if i > 0:
             pos_player_new = (path[i-1][0], path[i-1][1])
             pos_min_new = (path[i-1][2], path[i-1][3])
-            if pos_player == pos_player_new:
-                grid.get_celld()[(pos_player)].set_facecolor(LIGHT_GREEN)
-                grid.get_celld()[(pos_player)].get_text().set_text('Player is out')
-            else:
+
+            if not pos_player == pos_player_new and not pos_min == pos_player_new:
                 grid.get_celld()[(pos_player_new)].set_facecolor(col_map[maze[pos_player_new]])
                 grid.get_celld()[(pos_player_new)].get_text().set_text('')
+
+            if not pos_player == pos_min_new and not pos_min == pos_min_new:
                 grid.get_celld()[(pos_min_new)].set_facecolor(col_map[maze[pos_min_new]])
                 grid.get_celld()[(pos_min_new)].get_text().set_text('')
+
+            if pos_player == pos_min and not maze[pos_player] == 2:
+                grid.get_celld()[(pos_player)].set_facecolor(LIGHT_RED)
+                grid.get_celld()[(pos_player)].get_text().set_text('Player got caught')
+
+            elif maze[pos_player] == 2:
+                grid.get_celld()[(pos_player)].set_facecolor(LIGHT_GREEN)
+                grid.get_celld()[(pos_player)].get_text().set_text('Player out')
         display.display(fig)
         display.clear_output(wait=True)
         time.sleep(1)
