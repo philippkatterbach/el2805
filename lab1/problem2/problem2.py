@@ -31,12 +31,13 @@ k = env.action_space.n      # tells you the number of actions
 low, high = env.observation_space.low, env.observation_space.high
 
 # Parameters
-N_episodes = 5000        # Number of episodes to run for training
+N_episodes = 500       # Number of episodes to run for training
 discount_factor = 1.    # Value of gamma
 trace_factor = 0.7      #Value of lambda
-learning_rate = 0.00001
+learning_rate = 0.0001
 eps = -1 #better
 momentum = 0.7
+slowed = False
 
 
 # Reward
@@ -128,8 +129,13 @@ for i in range(N_episodes):
     v = np.array([[0.0]*len(frequencies),[0.0]*len(frequencies),[0.0]*len(frequencies)])
     print(i)
     j=0
+    k = len(episode_reward_list)
+    if k > 2 and episode_reward_list[k-1] > -190 and episode_reward_list[k-2] > -190 and episode_reward_list[k-3] > -190 and not slowed:
+        slowed = True
+        learning_rate = learning_rate/10
 
     while not done:
+
         # Take a random action
         # env.action_space.n tells you the number of actions
         # pdb.set_trace()
@@ -174,9 +180,9 @@ for i in range(N_episodes):
 
         temp_diff = reward + discount_factor*Q_next[action_next] - Q[action]
         v = momentum*v
-        v[0] = v[0] + np.matmul(learning_rate_matrix,temp_diff*z[0])
-        v[1] = v[1] + np.matmul(learning_rate_matrix,temp_diff*z[1])
-        v[2] = v[2] + np.matmul(learning_rate_matrix,temp_diff*z[2])
+        v[0] = v[0] + np.matmul(1/j*learning_rate_matrix,temp_diff*z[0])
+        v[1] = v[1] + np.matmul(1/j*learning_rate_matrix,temp_diff*z[1])
+        v[2] = v[2] + np.matmul(1/j*learning_rate_matrix,temp_diff*z[2])
 
         weights[0] = weights[0] + v[0]
         weights[1] = weights[1] + v[1]
@@ -203,7 +209,7 @@ for i in range(N_episodes):
     # print(weights[0]-weights[1])
 
     # Close environment
-    env.close()
+env.close()
     
 
 # Plot Rewards
