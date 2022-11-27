@@ -189,7 +189,7 @@ class Maze:
         elif self.__is_finished(state_new):
             return self.GOAL_REWARD
         # minotaur catches player
-        elif self.__player_eaten(state_new):
+        elif self.__player_caught(state_new):
             return self.IMPOSSIBLE_REWARD
         # normal step
         else:
