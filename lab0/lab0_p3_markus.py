@@ -59,7 +59,7 @@ class MyNetwork(nn.Module):
 
 
 ### CREATE RL ENVIRONMENT ###
-env = env = gym.make('CartPole-v1',render_mode="human")      # Create a CartPole environment
+env = gym.make('CartPole-v1')      # Create a CartPole environment
 n = len(env.observation_space.low)   # State space dimensionality
 m = env.action_space.n               # Number of actions
 
@@ -72,22 +72,18 @@ optimizer = optim.Adam(network.parameters(),lr=1e-4)
 ### PLAY ENVIRONMENT ###
 # The next while loop plays 5 episode of the environment
 for episode in range(5):
-    state = env.reset()                  # Reset environment, returns initial
-    restart = True                                     # state
+    state = env.reset()                  # Reset environment, returns initial                                    # state
     done = False                         # Boolean variable used to indicate if
                                          # an episode terminated
 
     while not done:
-        env.render()                     # Render the environment
+        # env.render()                     # Render the environment
                                          # (DO NOT USE during training of the
                                          # labs...)
         # action  = np.random.randint(m)   # Pick a random integer between
                                          # [0, m-1]
 
         #pdb.set_trace()
-        if restart == True:
-            state = [state[0][0],state[0][1],state[0][2],state[0][3]]
-            restart = False
         state_tensor = torch.tensor([state],requires_grad=False, dtype=torch.float32)
         
         action_values = network(state_tensor)
@@ -95,7 +91,7 @@ for episode in range(5):
         val,index = action_values.max(1)
 
         action = index.item()
-
+        pdb.set_trace()
         # The next line takes permits you to take an action in the RL environment
         # env.step(action) returns 4 variables:
         # (1) next state; (2) reward; (3) done variable; (4) additional stuff
