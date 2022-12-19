@@ -230,6 +230,6 @@ ax[1].legend()
 ax[1].grid(alpha=0.3)
 plt.show()
 
-torch.save(target_network, 'neural-network-1.pth')
+# torch.save(target_network, 'neural-network-1.pth')
 
 pdb.set_trace()

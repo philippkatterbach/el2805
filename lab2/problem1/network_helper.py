@@ -17,5 +17,5 @@ class MyNetwork(nn.Module):
         l2_act = self.layer1_activation(l2)
         output = self.output_layer(l2_act)
         return output
-model = torch.load('neural-network-2.pth')
+model = torch.load('neural-network-1.pth')
 torch.save(model.to('cpu'),'neural-network-1.pth')
