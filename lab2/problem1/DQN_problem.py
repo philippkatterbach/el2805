@@ -126,7 +126,10 @@ for i in EPISODES:
 
         #Take e-greedy action of network
         if random.uniform(0, 1) < eps:
-            action = np.random.randint(0, n_actions)
+            action = np.random.randint(0, n_actions + 4)
+            #do nothing with 50%
+            if action > 3:
+                action = 0
         else: 
             state_tensor = torch.tensor([state],requires_grad=False, dtype=torch.float32)
             action_values = network(state_tensor)
@@ -226,5 +229,7 @@ ax[1].set_title('Total number of steps vs Episodes')
 ax[1].legend()
 ax[1].grid(alpha=0.3)
 plt.show()
+
+torch.save(target_network, 'neural-network-1.pth')
 
 pdb.set_trace()
